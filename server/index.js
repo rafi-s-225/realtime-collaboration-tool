@@ -21,19 +21,30 @@ app.use(express.json());
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("MongoDB Error:", err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.log("❌ MongoDB Error:", err));
 
 app.get("/", (req, res) => {
   res.send("Collaboration Tool Backend Running!");
 });
 
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+// Track users per room
+const roomUsers = {};
 
-  socket.on("join-room", async (roomId) => {
+io.on("connection", (socket) => {
+  console.log("🟢 User connected:", socket.id);
+
+  socket.on("join-room", async (roomId, username) => {
     socket.join(roomId);
-    console.log(`User ${socket.id} joined room: ${roomId}`);
+    socket.roomId = roomId;
+    socket.username = username;
+
+    if (!roomUsers[roomId]) roomUsers[roomId] = [];
+    roomUsers[roomId].push({ id: socket.id, username });
+
+    io.to(roomId).emit("room-users", roomUsers[roomId]);
+
+    console.log(`User ${username} joined room: ${roomId}`);
 
     let document = await Document.findById(roomId);
     if (!document) {
@@ -43,9 +54,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send-changes", (content, roomId) => {
-    console.log(`📤 Changes received from ${socket.id} for room ${roomId}`);
     socket.to(roomId).emit("receive-changes", content);
-    console.log(`📨 Changes sent to other users in room ${roomId}`);
   });
 
   socket.on("save-document", async (roomId, content) => {
@@ -53,9 +62,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    const roomId = socket.roomId;
+    if (roomId && roomUsers[roomId]) {
+      roomUsers[roomId] = roomUsers[roomId].filter((u) => u.id !== socket.id);
+      io.to(roomId).emit("room-users", roomUsers[roomId]);
+    }
+    console.log("🔴 User disconnected:", socket.id);
   });
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

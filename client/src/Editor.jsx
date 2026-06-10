@@ -11,10 +11,16 @@ export default function Editor() {
   const { id: documentId } = useParams()
   const [socket, setSocket] = useState(null)
   const [value, setValue] = useState('')
+  const [users, setUsers] = useState([])
+  const [connected, setConnected] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [username] = useState(() => `User${Math.floor(Math.random() * 1000)}`)
 
   // Connect to socket
   useEffect(() => {
     const s = io(SOCKET_SERVER)
+    s.on('connect', () => setConnected(true))
+    s.on('disconnect', () => setConnected(false))
     setSocket(s)
     return () => s.disconnect()
   }, [])
@@ -22,30 +28,26 @@ export default function Editor() {
   // Join room and load document
   useEffect(() => {
     if (!socket) return
-    socket.emit('join-room', documentId)
-    socket.on('load-document', (content) => {
-      setValue(content || '')
-    })
-  }, [socket, documentId])
+    socket.emit('join-room', documentId, username)
+    socket.on('load-document', (content) => setValue(content || ''))
+    socket.on('room-users', (userList) => setUsers(userList))
+  }, [socket, documentId, username])
 
   // Receive changes from other users
   useEffect(() => {
     if (!socket) return
-   const handler = (content) => {
-      console.log('Received changes from another user')
-      setValue(content)
-    }
+    const handler = (content) => setValue(content)
     socket.on('receive-changes', handler)
     return () => socket.off('receive-changes', handler)
   }, [socket])
 
   // Send changes to other users
-const handleChange = (content) => {
+  const handleChange = (content) => {
     setValue(content)
     if (!socket) return
-    console.log('Sending changes for room:', documentId)
     socket.emit('send-changes', content, documentId)
   }
+
   // Auto-save every 2 seconds
   useEffect(() => {
     if (!socket) return
@@ -55,13 +57,45 @@ const handleChange = (content) => {
     return () => clearInterval(interval)
   }, [socket, value, documentId])
 
+  // Copy room link
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
-    <div className="editor-container">
+    <div className="editor-page">
+      {/* Header */}
       <div className="editor-header">
-        <h2>📝 Realtime Collaboration Tool</h2>
-        <span className="room-id">Room ID: {documentId}</span>
+        <div className="header-left">
+          <h2>📝 Realtime Collaboration Tool</h2>
+          <span className={`status-badge ${connected ? 'connected' : 'disconnected'}`}>
+            {connected ? '🟢 Connected' : '🔴 Disconnected'}
+          </span>
+        </div>
+        <div className="header-right">
+          <div className="users-list">
+            {users.map((u) => (
+              <span key={u.id} className="user-badge">
+                👤 {u.username}
+              </span>
+            ))}
+          </div>
+          <button className="copy-btn" onClick={copyLink}>
+            {copied ? '✅ Copied!' : '🔗 Copy Link'}
+          </button>
+        </div>
       </div>
-      <div data-color-mode="light" className="editor-wrapper">
+
+      {/* Room ID bar */}
+      <div className="room-bar">
+        <span>🏠 Room: <strong>{documentId}</strong></span>
+        <span className="users-count">👥 {users.length} user{users.length !== 1 ? 's' : ''} online</span>
+      </div>
+
+      {/* Editor */}
+      <div className="editor-wrapper" data-color-mode="light">
         <MDEditor
           value={value}
           onChange={handleChange}
