@@ -1,0 +1,146 @@
+.editor-page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-studio {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-glass);
+}
+
+.studio-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid var(--border-glass);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title-edit-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 240px;
+}
+
+.title-icon {
+  color: var(--accent-primary);
+}
+
+.document-title-input {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  outline: none;
+  width: 100%;
+}
+
+.document-title-input:focus {
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+.studio-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-switcher {
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.action-sm {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.doc-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 24px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--border-glass);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.users-online {
+  margin-left: auto;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.editor-wrapper {
+  padding: 0;
+  background: #0d1117;
+}
+
+/* Customizing UIW MD-Editor Dark Theme */
+.w-md-editor {
+  background-color: #0d1117 !important;
+  color: #c9d1d9 !important;
+  border: none !important;
+}
+
+.w-md-editor-toolbar {
+  background-color: #161b22 !important;
+  border-bottom: 1px solid #30363d !important;
+}
+
+.w-md-editor-toolbar li button {
+  color: #8b949e !important;
+}
+
+.w-md-editor-toolbar li button:hover {
+  color: #58a6ff !important;
+  background-color: rgba(177, 186, 196, 0.12) !important;
+}
+
+.w-md-editor-text-input,
+.w-md-editor-text-pre {
+  font-family: 'Fira Code', monospace !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+}

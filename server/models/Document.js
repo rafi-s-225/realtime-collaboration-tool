@@ -1,11 +1,28 @@
 const mongoose = require("mongoose");
 
-const DocumentSchema = new mongoose.Schema({
+const RoomSchema = new mongoose.Schema({
   _id: String,
+  title: {
+    type: String,
+    default: "Untitled Workspace",
+  },
+  type: {
+    type: String,
+    enum: ["doc", "board"],
+    default: "doc",
+  },
   content: {
-    type: Object,
+    type: String,
     default: "",
+  },
+  boardData: {
+    type: Array,
+    default: [],
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
-module.exports = mongoose.model("Document", DocumentSchema);
+module.exports = mongoose.model("Document", RoomSchema);
